@@ -16,6 +16,7 @@ GitHub勉強会向けの練習用リポジトリです。参加者は誰でも�
 | `examples/` | 簡単なサンプルコード。1行直してPRを出す練習に |
 | `docs/glossary.md` | IT用語集。誤字・説明不足があるので、見つけたら直すPRを出してみよう |
 | `docs/self-introduction.md` | 参加者の自己紹介を追記していくファイル |
+| `docs/guide.html` | ブランチ作成〜マージまでを1アクションずつ図解した徹底ガイド |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PRを出すときに自動で入るテンプレート |
 
 ## 参加のしかた（初めての人向け）
@@ -27,6 +28,7 @@ GitHub勉強会向けの練習用リポジトリです。参加者は誰でも�
 5. 他の参加者からレビューをもらう、または自分でマージしてみる
 
 詳しい手順は [CONTRIBUTING.md](./CONTRIBUTING.md) を参照してください。
+もっと丁寧に1ステップずつ知りたい人は [ブランチ→変更→PR→マージ 徹底ガイド](https://ayako0520.github.io/github-practice/guide.html)（GitHub Pages）もどうぞ。
 
 ## 事例（お手本PR）
 
