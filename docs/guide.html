@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ブランチ→変更→PR→マージ 路線図ガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ecd9;
+    --paper2:#eadfc2;
+    --ink:#1c1a14;
+    --sub:#6b6250;
+    --card:#fffdf6;
+    --line1:#2f6fed; --line1-rgb:47,111,237;
+    --line2:#178a4c; --line2-rgb:23,138,76;
+    --line3:#e07b1a; --line3-rgb:224,123,26;
+    --line4:#7c4fe0; --line4-rgb:124,79,224;
+    --line5:#d1274f; --line5-rgb:209,39,79;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 8% 0%, rgba(224,123,26,.10), transparent 40%),
+      radial-gradient(circle at 95% 15%, rgba(47,111,237,.10), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0 1px, transparent 1px 26px),
+      var(--paper);
+  }
+  .page{max-width:920px;margin:0 auto;padding:48px 28px 80px}
+  .mono{font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace}
+
+  .hero{padding:8px 0 36px;border-bottom:3px solid var(--ink);margin-bottom:36px}
+  .kicker{
+    font-family:"JetBrains Mono",monospace;font-weight:700;letter-spacing:.18em;
+    font-size:.75rem;color:var(--sub);margin:0 0 10px;
+    animation:fadeUp .6s ease both;
+  }
+  .hero h1{
+    font-size:2.6rem;line-height:1.25;margin:0 0 16px;font-weight:900;letter-spacing:-.01em;
+    animation:fadeUp .6s .05s ease both;
+  }
+  .hero h1 .accent{
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;transform:rotate(-1deg);margin-top:6px;
+  }
+  .lead{max-width:640px;color:#3a3527;font-size:1.02rem;line-height:1.85;margin:0 0 22px;animation:fadeUp .6s .1s ease both}
+  .lead a{color:var(--line1);font-weight:700;text-decoration-thickness:2px}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;animation:fadeUp .6s .15s ease both}
+  .pill{
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.78rem;
+    padding:8px 14px;border-radius:999px;color:#fff;white-space:nowrap;
+  }
+  .pill.p1{background:var(--line1)} .pill.p2{background:var(--line2)}
+  .pill.p3{background:var(--line3)} .pill.p4{background:var(--line4)}
+  .pill.p5{background:var(--line5)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .part{margin-bottom:8px}
+  .part-banner{display:flex;align-items:baseline;gap:12px;margin:0 0 26px}
+  .part-badge{
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.72rem;
+    color:#fff;background:var(--line);padding:4px 10px;border-radius:5px;letter-spacing:.08em;
+  }
+  .part-banner h2{margin:0;font-size:1.5rem;font-weight:900}
+  .part-1{--line:var(--line1);--line-rgb:var(--line1-rgb)}
+  .part-2{--line:var(--line2);--line-rgb:var(--line2-rgb)}
+  .part-3{--line:var(--line3);--line-rgb:var(--line3-rgb)}
+  .part-4{--line:var(--line4);--line-rgb:var(--line4-rgb)}
+  .part-5{--line:var(--line5);--line-rgb:var(--line5-rgb)}
+
+  .transfer{
+    margin:14px 0 30px 0;padding:10px 16px;border:2px dashed var(--sub);
+    border-radius:10px;color:var(--sub);font-weight:700;font-size:.85rem;
+    background:var(--paper2);display:inline-block;
+  }
+
+  .step{position:relative;padding-left:76px;padding-bottom:34px}
+  .step::before{
+    content:'';position:absolute;left:23px;top:52px;bottom:-34px;width:6px;
+    background:var(--line);border-radius:3px;
+  }
+  .step:last-child::before{display:none}
+  .stop{
+    position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;
+    background:var(--line);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:1.15rem;box-shadow:0 0 0 6px var(--paper),0 6px 14px rgba(0,0,0,.18);
+    font-family:"JetBrains Mono",monospace;
+  }
+  .step h3{margin:2px 0 8px;font-size:1.12rem;font-weight:900}
+  .step p.desc{margin:0 0 14px;color:#3a3527;line-height:1.75;font-size:.96rem}
+  .step p.desc b{background:rgba(var(--line-rgb),.14);padding:0 4px;border-radius:3px}
+
+  .window{
+    background:var(--card);border:1px solid #d8cfae;border-radius:12px;overflow:hidden;
+    box-shadow:0 8px 22px rgba(28,26,20,.10);
+  }
+  .win-bar{background:#ece3c8;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #d8cfae}
+  .win-dot{width:9px;height:9px;border-radius:50%;background:#cbbf98}
+  .win-url{
+    font-family:"JetBrains Mono",monospace;font-size:.68rem;color:#6b6250;margin-left:6px;
+    background:#fbf7ea;padding:3px 10px;border-radius:6px;border:1px solid #d8cfae;
+  }
+  .win-body{padding:16px 18px;font-size:.86rem}
+
+  .gh-btn{
+    font-family:"JetBrains Mono",monospace;font-size:.78rem;font-weight:700;
+    padding:6px 12px;border-radius:6px;display:inline-flex;align-items:center;gap:6px;
+    border:1px solid #d8cfae;background:#fbf7ea;color:#3a3527;
+  }
+  .gh-btn.green{background:#178a4c;color:#fff;border-color:#178a4c}
+  .gh-btn.gray{background:#eceae0;color:#3a3527}
+  .gh-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+  .ring{position:relative;display:inline-block}
+  .ring::after{
+    content:'';position:absolute;inset:-8px;border:3px solid var(--line5);border-radius:10px;
+    animation:pulse 1.7s ease-out infinite;
+  }
+  .ring.round::after{border-radius:50%}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(209,39,79,.45)}
+    100%{box-shadow:0 0 0 12px rgba(209,39,79,0)}
+  }
+  .tag-here{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;color:var(--line5);margin-left:6px}
+
+  .dropdown{border:1px solid #d8cfae;border-radius:8px;background:#fbf7ea;padding:10px;width:min(320px,100%)}
+  .dd-search{
+    font-family:"JetBrains Mono",monospace;font-size:.8rem;background:#fff;border:1px solid #d8cfae;
+    border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;min-height:1.4em;
+  }
+  .dd-item{padding:6px 8px;border-radius:6px;font-size:.8rem;color:#3a3527}
+  .dd-item.hit{background:rgba(23,138,76,.12);color:#178a4c;font-weight:700;font-family:"JetBrains Mono",monospace}
+
+  .typed{white-space:pre-wrap;word-break:break-word}
+  .typed .cur{
+    display:inline-block;width:2px;height:1em;background:var(--ink);margin-left:1px;
+    animation:blink 0.9s steps(1) infinite;vertical-align:-2px;
+  }
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  .char{opacity:0;animation:reveal .1s linear forwards}
+  @keyframes reveal{to{opacity:1}}
+
+  .editor{
+    font-family:"JetBrains Mono",monospace;font-size:.78rem;background:#1c1a14;color:#eadfc2;
+    border-radius:8px;padding:12px 14px;line-height:1.9;overflow-x:auto;
+  }
+  .editor .ln{color:#6b6250;display:inline-block;width:1.6em;user-select:none}
+  .editor .add{color:#8fffb0}
+  .editor .cursor-line{background:rgba(255,255,255,.06);display:block;margin:0 -14px;padding:0 14px}
+
+  .commitbox{border:1px solid #d8cfae;border-radius:8px;background:#fbf7ea;padding:12px}
+  .commitbox .field{
+    font-family:"JetBrains Mono",monospace;font-size:.8rem;background:#fff;border:1px solid #d8cfae;
+    border-radius:6px;padding:7px 9px;margin-bottom:8px;min-height:1.3em;
+  }
+  .commitbox .field.tall{min-height:3.4em;color:#8a8168}
+  .radio-row{display:flex;align-items:center;gap:8px;font-size:.78rem;margin-bottom:10px;color:#3a3527}
+  .radio-dot{width:14px;height:14px;border-radius:50%;border:5px solid var(--line2);background:#fff;flex:none}
+
+  .banner-yellow{
+    background:#fdf1cf;border:1px solid #e8c766;border-radius:8px;padding:10px 12px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.82rem;
+  }
+  .banner-purple{
+    background:#efe7fb;border:1px solid #c9adf2;border-radius:8px;padding:12px 14px;
+    color:#4a2f8a;font-weight:700;font-size:.86rem;
+  }
+
+  .comparebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:"JetBrains Mono",monospace;font-size:.78rem}
+  .comparebar .chip{background:#eceae0;border-radius:6px;padding:5px 10px}
+  .comparebar .chip.hi{background:rgba(124,79,224,.15);color:#5a35b0;font-weight:700}
+
+  .tabs{display:flex;gap:14px;border-bottom:1px solid #d8cfae;padding-bottom:8px;margin-bottom:12px;font-size:.8rem;color:#8a8168}
+  .tabs .on{color:var(--ink);font-weight:900;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:-9px}
+  .diffline{font-family:"JetBrains Mono",monospace;font-size:.76rem;padding:2px 8px;border-radius:3px}
+  .diffline.plus{background:rgba(23,138,76,.15);color:#0f5c33}
+
+  .optional{border:2px dashed #b7ae8f;color:var(--sub)}
+  .optional-tag{
+    font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;color:var(--sub);
+    border:1px solid var(--sub);padding:2px 8px;border-radius:999px;margin-left:8px;
+  }
+
+  .finish{
+    margin-top:54px;padding:32px 26px;border-radius:16px;background:var(--ink);color:var(--paper);
+    text-align:center;
+  }
+  .finish h2{margin:0 0 10px;font-size:1.7rem}
+  .finish p{margin:0 auto 22px;max-width:560px;color:#d8cfae;line-height:1.8;font-size:.94rem}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .cta{
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.85rem;
+    padding:12px 22px;border-radius:8px;text-decoration:none;background:#fff;color:var(--ink);
+  }
+  .cta.ghost{background:transparent;color:#fff;border:1px solid #6b6250}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <p class="kicker">GITHUB-PRACTICE ROUTE MAP - 全26駅</p>
+    <h1>ブランチ→変更→PR→マージ<br><span class="accent">ボタン1つ、文字1つ単位で追う路線図</span></h1>
+    <p class="lead">
+      「なんとなく分かった気がする」を卒業するための資料です。5本の路線（ブランチを作る／変更する／コミットする／PRを出す／マージする）を、駅（1アクション）ごとに止まりながら進みます。
+      実際にこの通りに操作して生まれたのが <a href="https://github.com/ayako0520/github-practice/pull/1">マージ済みのお手本PR #1</a> です。並べて見ながら読むと迷いません。
+    </p>
+    <div class="legend">
+      <span class="pill p1">1 ブランチを作る</span>
+      <span class="pill p2">2 変更する</span>
+      <span class="pill p3">3 コミットする</span>
+      <span class="pill p4">4 PRを出す</span>
+      <span class="pill p5">5 マージする</span>
+    </div>
+  </header>
+
+  <main class="track">
+
+    <section class="part part-1">
+      <div class="part-banner"><span class="part-badge">PART 1 / 5</span><h2>ブランチを作る</h2></div>
+
+      <div class="step">
+        <div class="stop">1</div>
+        <h3>リポジトリのトップページを開く</h3>
+        <p class="desc"><b>github.com/ayako0520/github-practice</b> を開きます。ここが今回の「駅」の出発点です。</p>
+        <div class="window">
+          <div class="win-bar"><span class="win-dot"></span><span class="win-dot"></span><span class="win-dot"></span><span class="win-url">github.com/ayako0520/github-practice</span></div>
+          <div class="win-body">
+            <div class="gh-row" style="margin-bottom:10px">
+              <span class="gh-btn">main &#9662;</span>
+              <span class="gh-btn green">Code &#9662;</span>
+              <span class="gh-btn gray">Fork</span>
+            </div>
+            <div class="mono" style="font-size:.78rem;color:#8a8168">README.md - CONTRIBUTING.md - docs/ - examples/ - .github/</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">2</div>
+        <h3>「main」と書かれたブランチボタンを見つける</h3>
+        <p class="desc">画面左上の <b class="mono">main &#9662;</b> というボタンが、今どのブランチを見ているかの表示です。今はここが main になっています。</p>
+        <div class="window"><div class="win-body">
+          <span class="ring round"><span class="gh-btn">main &#9662;</span></span><span class="tag-here">&larr; ここ</span>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">3</div>
+        <h3>ブランチボタンを1回クリックする</h3>
+        <p class="desc">クリックすると、ブランチを検索・作成できる小さなパネルが開きます。</p>
+        <div class="window"><div class="win-body">
+          <div class="dropdown">
+            <div class="dd-search mono">Find or create a branch...</div>
+            <div class="dd-item">main</div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">4</div>
+        <h3>検索欄に、新しいブランチ名を1文字ずつ打つ</h3>
+        <p class="desc">検索欄をクリックしてカーソルを置き、<b class="mono">docs/add-term</b> と実際にキーボードで1文字ずつ入力します。d, o, c, s, /, a, d, d, -, t, e, r, m の順です。</p>
+        <div class="window"><div class="win-body">
+          <div class="dropdown">
+            <div class="dd-search mono typed">
+              <span class="char" style="animation-delay:.00s">d</span><span class="char" style="animation-delay:.06s">o</span><span class="char" style="animation-delay:.12s">c</span><span class="char" style="animation-delay:.18s">s</span><span class="char" style="animation-delay:.24s">/</span><span class="char" style="animation-delay:.30s">a</span><span class="char" style="animation-delay:.36s">d</span><span class="char" style="animation-delay:.42s">d</span><span class="char" style="animation-delay:.48s">-</span><span class="char" style="animation-delay:.54s">t</span><span class="char" style="animation-delay:.60s">e</span><span class="char" style="animation-delay:.66s">r</span><span class="char" style="animation-delay:.72s">m</span><span class="cur"></span>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">5</div>
+        <h3>「Create branch: docs/add-term from main」をクリック</h3>
+        <p class="desc">入力すると自動で候補が出てきます。緑色でハイライトされた行をクリックすると、その場で新しいブランチが作られます。</p>
+        <div class="window"><div class="win-body">
+          <div class="dropdown">
+            <div class="dd-search mono">docs/add-term</div>
+            <span class="ring"><div class="dd-item hit">+ Create branch: docs/add-term from main</div></span>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">6</div>
+        <h3>ブランチ表示が切り替わったことを確認</h3>
+        <p class="desc">左上のボタンが <b class="mono">docs/add-term &#9662;</b> に変わっていれば成功です。今この瞬間、あなたは main とは別の「支線」の上にいます。main は一切触れていないので安心してください。</p>
+        <div class="window"><div class="win-body">
+          <span class="gh-btn" style="background:rgba(23,138,76,.15);border-color:#178a4c;color:#0f5c33">docs/add-term &#9662;</span>
+        </div></div>
+      </div>
+    </section>
+
+    <div class="transfer">乗り換え：ここから「変更する」ライン（緑）</div>
+
+    <section class="part part-2">
+      <div class="part-banner"><span class="part-badge">PART 2 / 5</span><h2>ファイルを変更する</h2></div>
+
+      <div class="step">
+        <div class="stop">7</div>
+        <h3>docs フォルダ → glossary.md の順に開く</h3>
+        <p class="desc">ファイル一覧から <b class="mono">docs</b> をクリックし、次に <b class="mono">glossary.md</b> をクリックしてファイルの中身を表示します。</p>
+        <div class="window"><div class="win-body mono" style="font-size:.8rem">
+          github-practice / <span style="background:rgba(23,138,76,.15);padding:1px 6px;border-radius:4px">docs</span> / <span style="background:rgba(23,138,76,.15);padding:1px 6px;border-radius:4px">glossary.md</span>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">8</div>
+        <h3>右上の鉛筆アイコン（Edit this file）をクリック</h3>
+        <p class="desc">ファイル表示画面の右上あたりに、鉛筆の形をしたアイコンがあります。これが編集モードへの入り口です。</p>
+        <div class="window"><div class="win-body">
+          <div class="gh-row" style="justify-content:flex-end">
+            <span class="gh-btn">Raw</span>
+            <span class="ring round"><span class="gh-btn">Edit</span></span>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">9</div>
+        <h3>直したい行にカーソルを置く</h3>
+        <p class="desc">表の一番下の行あたりをクリックして、キーボードで打つ場所（カーソル）をそこに固定します。狙いを外すと関係ない場所を壊してしまうので、ここは焦らず。</p>
+        <div class="editor">
+          <span class="ln">08</span> | フォーク | 他人のリポジトリを自分のアカウントにコピーすること |<br>
+          <span class="ln">09</span> <span class="cursor-line">| &#9612; |</span><br>
+          <span class="ln">10</span> | Issue | バグ報告や質問を書いておくチケット |
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">10</div>
+        <h3>1文字ずつ打って新しい行を書く</h3>
+        <p class="desc">キーボードで実際に打ちます。ここが「変更」そのものです。1文字打つたびに画面にその文字が現れます。</p>
+        <div class="editor">
+          <span class="ln">09</span> | <span class="typed"><span class="char" style="animation-delay:.0s">レ</span><span class="char" style="animation-delay:.08s">ビ</span><span class="char" style="animation-delay:.16s">ュ</span><span class="char" style="animation-delay:.24s">ー</span></span> | <span class="typed"><span class="char" style="animation-delay:.4s">他</span><span class="char" style="animation-delay:.44s">の</span><span class="char" style="animation-delay:.48s">人</span><span class="char" style="animation-delay:.52s">の</span><span class="char" style="animation-delay:.56s">P</span><span class="char" style="animation-delay:.60s">R</span><span class="char" style="animation-delay:.64s">を</span><span class="char" style="animation-delay:.68s">読</span><span class="char" style="animation-delay:.72s">ん</span><span class="char" style="animation-delay:.76s">で</span><span class="char" style="animation-delay:.80s">コ</span><span class="char" style="animation-delay:.84s">メ</span><span class="char" style="animation-delay:.88s">ン</span><span class="char" style="animation-delay:.92s">ト</span><span class="cur"></span></span> |
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">11</div>
+        <h3>打ち終えた内容を見直す</h3>
+        <p class="desc">スクロールして全体を眺め、誤字や打ち間違いがないか確認します。他の人の行を消していないかも必ずチェック。</p>
+        <div class="editor">
+          <span class="add">+ | レビュー | 他の人のPRを読んでコメントすること |</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="transfer">乗り換え：ここから「コミットする」ライン（オレンジ）</div>
+
+    <section class="part part-3">
+      <div class="part-banner"><span class="part-badge">PART 3 / 5</span><h2>コミットする</h2></div>
+
+      <div class="step">
+        <div class="stop">12</div>
+        <h3>画面を下までスクロールする</h3>
+        <p class="desc">編集画面の一番下に「Commit changes」という入力欄のかたまりがあります。そこまでマウスホイールでスクロールします。</p>
+        <div class="window"><div class="win-body" style="text-align:center;color:#8a8168;font-family:'JetBrains Mono',monospace;font-size:.78rem">scroll down</div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">13</div>
+        <h3>1行目の入力欄に、変更内容を1文字ずつ打つ</h3>
+        <p class="desc">これが「コミットメッセージ」、この変更に付ける短い名札です。<b>「用語集にレビューを追加」</b>のように、何をしたか分かる言葉にします。</p>
+        <div class="commitbox">
+          <div class="field mono typed">
+            <span class="char" style="animation-delay:.0s">用</span><span class="char" style="animation-delay:.05s">語</span><span class="char" style="animation-delay:.10s">集</span><span class="char" style="animation-delay:.15s">に</span><span class="char" style="animation-delay:.20s">レ</span><span class="char" style="animation-delay:.25s">ビ</span><span class="char" style="animation-delay:.30s">ュ</span><span class="char" style="animation-delay:.35s">ー</span><span class="char" style="animation-delay:.40s">を</span><span class="char" style="animation-delay:.45s">追</span><span class="char" style="animation-delay:.50s">加</span><span class="cur"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">14</div>
+        <h3>2行目の大きな欄に、補足説明を書く（任意）<span class="optional-tag">SKIP OK</span></h3>
+        <p class="desc">なぜその変更をしたか、詳しく書きたい時だけ使います。空でも次に進めます。</p>
+        <div class="commitbox">
+          <div class="field tall mono">用語集の「レビュー」の説明が抜けていたため追加しました。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">15</div>
+        <h3>「Commit directly to the docs/add-term branch」を確認</h3>
+        <p class="desc">ラジオボタンがこちらに丸印されているか見ます。これで main には触れず、自分のブランチだけに保存されます。</p>
+        <div class="commitbox">
+          <div class="radio-row"><span class="ring round"><span class="radio-dot"></span></span> Commit directly to the "docs/add-term" branch.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">16</div>
+        <h3>緑色の「Commit changes」ボタンをクリック</h3>
+        <p class="desc">これで変更が正式に記録されます。押した瞬間、あなたの支線（ブランチ）に新しい駅ができるイメージです。</p>
+        <div class="commitbox">
+          <span class="ring"><span class="gh-btn green">Commit changes</span></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="transfer">乗り換え：ここから「PRを出す」ライン（紫）</div>
+
+    <section class="part part-4">
+      <div class="part-banner"><span class="part-badge">PART 4 / 5</span><h2>プルリクエストを出す</h2></div>
+
+      <div class="step">
+        <div class="stop">17</div>
+        <h3>黄色いバナーを探す</h3>
+        <p class="desc">コミット後、リポジトリ画面の上のほうに「docs/add-term had recent pushes」という黄色い帯が出ます。見つけたら次へ。</p>
+        <div class="banner-yellow">
+          <span>docs/add-term had recent pushes 1 minute ago</span>
+          <span class="ring"><span class="gh-btn green">Compare & pull request</span></span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">18</div>
+        <h3>「Compare & pull request」ボタンをクリック</h3>
+        <p class="desc">押すと、変更内容を確認しながらPRを作る画面に移動します。</p>
+        <div class="window"><div class="win-url" style="margin:14px 18px;display:inline-block">.../compare/main...docs/add-term</div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">19</div>
+        <h3>「base: main」と「compare: docs/add-term」を確認</h3>
+        <p class="desc">「main に、docs/add-term の変更を取り込みます」という向きが合っているかチェックします。ここが逆だと事故のもとです。</p>
+        <div class="window"><div class="win-body">
+          <div class="comparebar">
+            <span class="chip">base:</span><span class="ring round"><span class="chip hi">main</span></span>
+            <span>&harr;</span>
+            <span class="chip">compare:</span><span class="ring round"><span class="chip hi">docs/add-term</span></span>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">20</div>
+        <h3>タイトルと説明を1文字ずつ入力する</h3>
+        <p class="desc">タイトル欄・説明欄それぞれをクリックし、何をしたPRかを書きます。あとで見た人が分かる言葉を選びます。</p>
+        <div class="commitbox">
+          <div class="field mono typed">
+            <span class="char" style="animation-delay:.0s">事</span><span class="char" style="animation-delay:.05s">例</span><span class="char" style="animation-delay:.10s">:</span><span class="char" style="animation-delay:.15s"> </span><span class="char" style="animation-delay:.20s">用</span><span class="char" style="animation-delay:.25s">語</span><span class="char" style="animation-delay:.30s">集</span><span class="char" style="animation-delay:.35s">に</span><span class="char" style="animation-delay:.40s">レ</span><span class="char" style="animation-delay:.45s">ビ</span><span class="char" style="animation-delay:.50s">ュ</span><span class="char" style="animation-delay:.55s">ー</span><span class="char" style="animation-delay:.60s">を</span><span class="char" style="animation-delay:.65s">追</span><span class="char" style="animation-delay:.70s">加</span><span class="cur"></span>
+          </div>
+          <div class="field tall mono">用語集に「レビュー」の項目を追加しました。空欄になっていた説明を埋めています。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="stop">21</div>
+        <h3>緑色の「Create pull request」ボタンをクリック</h3>
+        <p class="desc">これで正式にPRが作成されます。ここまでで main は一切変更されておらず、あくまで「お願い」を出しただけの状態です。</p>
+        <div class="commitbox">
+          <span class="ring"><span class="gh-btn green">Create pull request</span></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="transfer">乗り換え：ここから「マージする」ライン（赤）</div>
+
+    <section class="part part-5">
+      <div class="part-banner"><span class="part-badge">PART 5 / 5</span><h2>マージする</h2></div>
+
+      <div class="step">
+        <div class="stop">22</div>
+        <h3>「Files changed」タブで差分を確認</h3>
+        <p class="desc">タブを切り替えると、追加した行が緑、消した行が赤で色分け表示されます。これが「実際に何が変わるか」の最終確認です。</p>
+        <div class="window"><div class="win-body">
+          <div class="tabs"><span>Conversation</span><span>Commits</span><span class="on">Files changed</span></div>
+          <div class="diffline plus">+ | レビュー | 他の人のPRを読んでコメントすること |</div>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">23</div>
+        <h3>緑色の「Merge pull request」ボタンをクリック</h3>
+        <p class="desc">内容に問題がなければ押します。自分のPRを自分でマージする練習もこのリポジトリではOKです。</p>
+        <div class="window"><div class="win-body">
+          <span class="ring"><span class="gh-btn green">Merge pull request &#9662;</span></span>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">24</div>
+        <h3>続けて出てくる「Confirm merge」を押す</h3>
+        <p class="desc">確認のダイアログが出るので、もう一度クリックして最終確定します。2段階になっているのは、うっかりマージ防止のためです。</p>
+        <div class="window"><div class="win-body">
+          <span class="ring"><span class="gh-btn green">Confirm merge</span></span>
+        </div></div>
+      </div>
+
+      <div class="step">
+        <div class="stop">25</div>
+        <h3>「successfully merged」の表示を確認</h3>
+        <p class="desc">紫色の帯で完了メッセージが出れば、あなたの変更は無事 main に取り込まれました。おめでとうございます。</p>
+        <div class="banner-purple">Pull request successfully merged and closed</div>
+      </div>
+
+      <div class="step">
+        <div class="stop">26</div>
+        <h3>「Delete branch」で片付ける<span class="optional-tag">任意</span></h3>
+        <p class="desc">使い終えた <b class="mono">docs/add-term</b> ブランチはもう不要なので、グレーのボタンで削除できます。消しても main の内容には影響しません。</p>
+        <div class="window optional" style="border-style:dashed"><div class="win-body">
+          <span class="gh-btn gray">Delete branch</span>
+        </div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="finish">
+    <h2>到着です、おつかれさまでした</h2>
+    <p>
+      ここまでの26駅が、そのまま実際にこのリポジトリで再現できます。間違えても壊れても大丈夫な練習場です。
+      まずは <b class="mono">docs/glossary.md</b> か <b class="mono">docs/self-introduction.md</b> あたりから、自分のペースで1周してみてください。
+    </p>
+    <div class="cta-row">
+      <a class="cta" href="https://github.com/ayako0520/github-practice">リポジトリを開く</a>
+      <a class="cta ghost" href="https://github.com/ayako0520/github-practice/pull/1">お手本PR #1を見る</a>
+      <a class="cta ghost" href="https://github.com/ayako0520/github-practice/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
