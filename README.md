@@ -9,6 +9,16 @@ GitHub勉強会向けの練習用リポジトリです。参加者は誰でも�
 
 ことができます。壊れても気にせず、どんどん練習してください。
 
+## まず読むもの
+
+| ファイル | 内容 |
+|---|---|
+| [ROADMAP.md](./ROADMAP.md) | 学習の全体像（ステージ0〜5） |
+| [CURRICULUM.md](./CURRICULUM.md) | 勉強会の回ごとの進め方（全5回想定） |
+| [TEXTBOOK.md](./TEXTBOOK.md) | 用語や考え方の辞書的な解説 |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Fork〜PR〜マージの具体的な操作手順 |
+| [docs/guide.html](https://ayako0520.github.io/github-practice/guide.html) | クリック1つ・文字1つ単位の超詳細ガイド（GitHub Pages） |
+
 ## このリポジトリでできること
 
 | ディレクトリ | 内容 |
@@ -18,6 +28,7 @@ GitHub勉強会向けの練習用リポジトリです。参加者は誰でも�
 | `docs/self-introduction.md` | 参加者の自己紹介を追記していくファイル |
 | `docs/guide.html` | ブランチ作成〜マージまでを1アクションずつ図解した徹底ガイド |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PRを出すときに自動で入るテンプレート |
+| `.github/ISSUE_TEMPLATE/request-access.md` | 自分のPRを自分でマージできるようにするためのアクセス申請テンプレート |
 
 ## 参加のしかた（初めての人向け）
 
@@ -29,6 +40,11 @@ GitHub勉強会向けの練習用リポジトリです。参加者は誰でも�
 
 詳しい手順は [CONTRIBUTING.md](./CONTRIBUTING.md) を参照してください。
 もっと丁寧に1ステップずつ知りたい人は [ブランチ→変更→PR→マージ 徹底ガイド](https://ayako0520.github.io/github-practice/guide.html)（GitHub Pages）もどうぞ。
+
+## 自分のPRを自分でマージしたい人へ
+
+Fork・PR作成まではGitHubアカウントがあれば誰でもできますが、**「Merge pull request」ボタンはWrite権限（Collaborator登録）がある人にしか表示されません**。
+マージまで自分の手でやってみたい人は、Issueタブから「アクセス申請（Collaborator登録）」テンプレートで申請してください。詳しくは [CONTRIBUTING.md の0章](./CONTRIBUTING.md#0-write権限を1回だけリクエストする)。
 
 ## 事例（お手本PR）
 
